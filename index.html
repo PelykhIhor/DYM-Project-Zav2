@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Пелих Ігор</title>
     <style>
         body { 
@@ -48,15 +48,25 @@
             from {opacity: 1;}
             to {opacity: 0; visibility: hidden;}
         }
+        @media (max-width: 768px) {
+            #overlay {
+                width: 80%;
+                font-size: 14px;
+                padding: 15px;
+            }
+            #overlay .controls {
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="overlay">
         <h2>Керування 3D моделлю</h2>
         <div class="controls">
-            <p>🖱️ Ліва кнопка миші - обертання моделі</p>
-            <p>👆 Права кнопка миші - переміщення камери</p>
-            <p>⚪ Колесико миші - наближення/віддалення</p>
+            <p>🖱️ Ліва кнопка миші / Один палець - обертання моделі</p>
+            <p>👆 Права кнопка миші / Два пальці - переміщення камери</p>
+            <p>⚪ Колесико миші / Щипок - наближення/віддалення</p>
         </div>
         <p class="author">Розробник: Пелих Ігор</p>
     </div>
@@ -79,7 +89,10 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance"
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0x1a1a1a);
         document.body.appendChild(renderer.domElement);
@@ -91,6 +104,13 @@
         controls.minDistance = 1;
         controls.maxDistance = 10;
         controls.maxPolarAngle = Math.PI / 1.5;
+        controls.enableZoom = true;
+        controls.enableRotate = true;
+        controls.enablePan = true;
+        controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN
+        };
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
         scene.add(ambientLight);
@@ -142,11 +162,20 @@
         }
         animate();
 
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
         window.addEventListener('resize', onWindowResize, false);
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }, 100);
         }
     </script>
 </body>
